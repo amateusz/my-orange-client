@@ -12,11 +12,11 @@ setup(
     author_email='grzywomat@gmail.com',
     description='A little tool to login to "My Orange" mobile operator account and check how much internet you have left for example',
     install_requires=[
-        requests_oauthlib,
-        requests,
-        bs4,
-        json,
-        urllib.parse,  # python3 specific
-        getpass
+        'requests_oauthlib',
+        'requests',
+        'bs4',
+        'json',
+        'urllib.parse',  # python3 specific
+        'getpass'
     ]
 )
