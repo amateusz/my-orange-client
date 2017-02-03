@@ -16,6 +16,9 @@ except IOError:
         # now it means that credentials are wrong. exit
         print('Złe dane logowania. Zamykam')
         exit(-1)
-
-s = ora.getInfoServices(t, ora.getContractData(t)[1]['msisdn'])[1]
-print(s['MBamount'])
+contract = ora.getContractData(t)
+if contract[0] is True:
+    s = ora.getInfoServices(t, contract[1]['msisdn'])[1]
+    print(s['MBamount'])
+else:
+    print('ERR: ' + contract[1])
