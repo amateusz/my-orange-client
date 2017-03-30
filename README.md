@@ -2,7 +2,7 @@
 So I made a small script to check My Orange account information. (Orange is a mobile phone operator here in Poland)
 
 I needed it to know how much internet I have left at my laptop (builtin 3G modem hooray!).
-I'm not sure if it's legal, but I'd taken "Mój Orange" (polish version) Android app and reverse-engineered it by sniffing packets with circumvented cert.
+**_I'm not sure if it's legal_**, but I'd taken "Mój Orange" (polish version) Android app and reverse-engineered it by sniffing packets with circumvented cert.
 
 To run it, simply run it. Main function will then take over and ask you to log in and will print some demo info about your account. Alternatively you can use batch script "my-orange-net-left.bat".
 
