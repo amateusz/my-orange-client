@@ -1,5 +1,5 @@
 # my-orange-client
-So I made a small script to check your Orange account information. (Orange is a mobile phone operator here in Poland)
+So I made a small script to check My Orange account information. (Orange is a mobile phone operator here in Poland)
 
 I needed it to know how much internet I have left at my laptop (builtin 3G modem hooray!).
 I'm not sure if it's legal, but I'd taken "Mój Orange" (polish version) Android app and reverse-engineered it by sniffing packets with circumvented cert.
