@@ -122,6 +122,7 @@ def getInfoServices(token, msisdn):
 
         try:
             return (True, {'MBamount': packageValues[0][1].get_text('value').replace('.', ','),
+                           # pity of me. for complience with computer world it should be dot not comma, but I like comma better!
                            'MBdueTo': packageValues[3][0].get_text('value').rsplit(maxsplit=2)[1],
                            })
         except IndexError as ie:
