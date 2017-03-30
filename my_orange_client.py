@@ -17,6 +17,7 @@ client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',  # yeah, it is hardc
           }
 
 
+# noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck,PySimplifyBooleanCheck
 def main():
     # access some details as a demo / proof of concept
     try:
@@ -41,9 +42,9 @@ def main():
             # ready to make call for MBs
         else:
             exit(-1)  # error
-    notifications = getNotifications(client['msisdn'])
+    notifications = getNotifications()
     if notifications[0] == True:
-        print('---Brak nowych powiadomień') if notifications[1] == None else notifications
+        print('---Brak nowych powiadomień') if notifications[1] is None else notifications
     serviceInfo = getInfoServices(token, client['msisdn'])
     if serviceInfo[0] == True:
         client.update(serviceInfo[1])
@@ -53,6 +54,7 @@ def main():
         'MBdueTo'] + ' dni. (średnio ' + str(averageMBperDay).replace('.', ',') + ' MB dziennie)')
 
 
+# noinspection PySimplifyBooleanCheck
 def authorize(username=None, password=None):
     """Tries to load long term token from file. If not found takes /username/ and /password/ and generates long term token and saves it in working folder.\nIf no credientials provided and no file is fount, then raises exception."""
 
@@ -89,6 +91,7 @@ def authorize(username=None, password=None):
             # uf there is no file, get them new tokens
 
 
+# noinspection PyRedundantParentheses,PyRedundantParentheses
 def getInfoServices(token, msisdn):
     # xml:
     # <β:getNewInfoservicesAPIIn xmlns:β="api.orange.pl" xmlns=""><object><appVersion>3.4</appVersion><msisdn>572359832</msisdn></object><apiCode>mainPackageAPI</apiCode><apiCode>additionalPackageAPI</apiCode><withLimits>yes</withLimits><withSteps>yes</withSteps></β:getNewInfoservicesAPIIn>
@@ -118,7 +121,7 @@ def getInfoServices(token, msisdn):
         # 2  - intenet amount and date due
 
         try:
-            return (True, {'MBamount': packageValues[0][0].get_text('value').replace('.', ','),
+            return (True, {'MBamount': packageValues[0][1].get_text('value').replace('.', ','),
                            'MBdueTo': packageValues[3][0].get_text('value').rsplit(maxsplit=2)[1],
                            })
         except IndexError as ie:
@@ -127,10 +130,11 @@ def getInfoServices(token, msisdn):
             # exit(1)
 
 
-def getNotifications(msisdn):
-    # example GET https://mapi.orange.pl/api/endpoint/services/rest/notification?msisdn=572359832
+# noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
+def getNotifications():
+    # example GET https://mapi.orange.pl/api/endpoint/services/rest/notification?msisdn=572359xxx
     url = {'host': 'http://mapi.orange.pl',
-           'path': '/api/endpoint/services/rest/notification',
+           'path': '/api/endpoint/services/rest/notification'
            }
     headers = {'User-Agent': 'Windows tablet',
                }
@@ -146,6 +150,7 @@ def getNotifications(msisdn):
         return (False,)
 
 
+# noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
 def getContractData(token):
     url = {'host': 'https://mapi.orange.pl',
            'path': '/api2/endpoint/services/ecare'}
@@ -160,14 +165,18 @@ def getContractData(token):
     from bs4 import BeautifulSoup
     xml = BeautifulSoup(response.text, 'html.parser')  # , from_encoding='utf-8')
 
-    if xml.getcontractdataapiout.result.errorcode.get_text() == '0':
-        msisdn = xml.find('msisdn').get_text()
-        customerId = xml.find('customerid').get_text()
-        return (True, {'msisdn': msisdn, 'id': customerId})
-    else:
-        return (False,)
+    try:
+        if xml.getcontractdataapiout.result.errorcode.get_text() == '0':
+            msisdn = xml.find('msisdn').get_text()
+            customerId = xml.find('customerid').get_text()
+            return (True, {'msisdn': msisdn, 'id': customerId})
+        else:
+            return (False,)
+    except:
+        return (False, response.text)
 
 
+# noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
 def getNewToken(username, password):
     ## 1 - get temp credentials
 
