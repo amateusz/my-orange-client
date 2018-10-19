@@ -116,14 +116,15 @@ def getInfoServices(token, msisdn):
     else:
         packageValues = []
         # there are few <package>s, each contains 1 or more <values>'. in first package there is amount od Gigs, in third the date due. and there values are in <value>s
+        # update: now there are ~6 packages, 2nd being important for us. in its 1st value it has date due, in 2nd value amount of GBs.
         for item in xml.getnewinfoservicesapiout.findAll('package'):
             packageValues.append(item.findAll(name='value', recursive=True))
         # 2  - intenet amount and date due
 
         try:
-            return (True, {'MBamount': packageValues[0][1].get_text('value').replace('.', ','),
+            return (True, {'MBamount': packageValues[1][1].get_text('value').replace('.', ','),
                            # pity of me. for complience with computer world it should be dot not comma, but I like comma better!
-                           'MBdueTo': packageValues[3][0].get_text('value').rsplit(maxsplit=2)[1],
+                           'MBdueTo': packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1],
                            })
         except IndexError as ie:
             print(ie.args)
