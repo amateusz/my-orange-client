@@ -19,9 +19,9 @@ Login via token works. They use OAuth1 lmao.
 ```
 > import my_orange_client
 > my_orange_client.getMBamount()
-102
+99
 > my_orange_client.getDueToDays()
-364
+127
 ```
 
 - Running as a program
