@@ -12,17 +12,37 @@ client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',
           'client_secret': '0772c63e86fc4568a7ef2a17a794c418',
           'callback_url': 'oob',  # ?? whatever it means'
           'id': '',
-          'msisdn': -1,  # client mobile number. your login at the site https://www.orange.pl/zaloguj.phtml
-          'MBamount': -1,  # how much data plan
+          'msisdn': None,  # client mobile number. your login at the site https://www.orange.pl/zaloguj.phtml
+          'MBamount': None,  # how much data plan
           'MBdueTo': ''  # and for how long. maybe it should be of datetime class ?
           }
 
 
-# noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck,PySimplifyBooleanCheck
-def main():
+def getMBamount():
+    if not client['MBamount']:
+        if not client['msisdn'] or not client['id']:
+            refreshClient()
+        serviceInfo = getInfoServices(token, client['msisdn'])
+        if serviceInfo[0] == True:
+            client.update(serviceInfo[1])
+    print(client['MBamount'])
+
+
+def getDueToDays():  # due FOR should it be
+    if not client['MBamount']:
+        if not client['msisdn'] or not client['id']:
+            refreshClient()
+        serviceInfo = getInfoServices(token, client['msisdn'])
+        if serviceInfo[0] == True:
+            client.update(serviceInfo[1])
+    print(client['MBdueTo'])
+
+
+def refreshClient():
+    global token
     try:
         # try to authorize. if fails, then ask for new credientals
-        token = authorize()
+        token = handleToken()
     except IOError:
         if __name__ == '__main__':
             return ('Brak pliku z tokenem. Zaloguj się')
@@ -31,38 +51,46 @@ def main():
             username = input('Podaj login: ')
             password = input('Podaj haseło: ')
             # sanitize this user input
-            token = authorize(username, password)
+            token = handleToken(username, password)
             try:
-                token = authorize(u, getpass.getpass('Hasło :'))
+                token = handleToken(u, getpass.getpass('Hasło :'))
                 print(t)
             except PermissionError:
                 # now it means that credentials are wrong. exit
                 print('Złe dane logowania. Zamykam')
-                exit(-1)
+                return False
 
     # here we have a working token
     # print("token jest i działa: " + token[0] + ', ' + token[1])
-    if client['msisdn'] < 0 or client['id'] < 0:
+    if not client['msisdn'] or not client['id']:
         contractData = getContractData(token)
         if contractData[0] == True:
             client.update(contractData[1])
             # ready to make call for MBs
         else:
-            exit(-1)  # error
-    notifications = getNotifications()
-    if notifications[0] == True:
-        print('---Brak nowych powiadomień') if notifications[1] is None else notifications
-    serviceInfo = getInfoServices(token, client['msisdn'])
-    if serviceInfo[0] == True:
-        client.update(serviceInfo[1])
-    averageMBperDay = round(
-        float(client['MBamount'].split()[0].replace(',', '.')) / float(client['MBdueTo']) * 1024, 1)
-    print('---Pozostało ' + client['MBamount'] + ' do wykorzystania przez ' + client[
-        'MBdueTo'] + ' dni. (średnio ' + str(averageMBperDay).replace('.', ',') + ' MB dziennie)')
+            return False  # error
+    return True
+
+
+# noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck,PySimplifyBooleanCheck
+def main():
+    if not refreshClient():
+        exit(1)  # some error refreshing client data
+    else:
+        notifications = getNotifications()
+        if notifications[0] == True:
+            print('---Brak nowych powiadomień') if notifications[1] is None else notifications
+        serviceInfo = getInfoServices(token, client['msisdn'])
+        if serviceInfo[0] == True:
+            client.update(serviceInfo[1])
+        averageMBperDay = round(
+            float(client['MBamount'].split()[0].replace(',', '.')) / float(client['MBdueTo']) * 1024, 1)
+        print('---Pozostało ' + client['MBamount'] + ' do wykorzystania przez ' + client[
+            'MBdueTo'] + ' dni. (średnio ' + str(averageMBperDay).replace('.', ',') + ' MB dziennie)')
 
 
 # noinspection PySimplifyBooleanCheck
-def authorize(username=None, password=None):
+def handleToken(username=None, password=None):
     """Tries to load long term token from file. If not found takes /username/ and /password/ and generates long term token and saves it in working folder.\nIf no credientials provided and no file is fount, then raises exception."""
 
     if (username is not None or password is not None) and (username is not '' and password is not ''):
