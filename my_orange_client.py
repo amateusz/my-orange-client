@@ -7,32 +7,39 @@ tokenFilename = 'token.txt'
 
 token = ()
 
-client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',  # yeah, it is hardcoded. got it by sniffing the app
+client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',
+          # yeah, it is hardcoded. I got it by sniffing the mobile app
           'client_secret': '0772c63e86fc4568a7ef2a17a794c418',
           'callback_url': 'oob',  # ?? whatever it means'
           'id': '',
-          'msisdn': -1,
-          'MBdueTo': '',
-          'MBamount': -1
+          'msisdn': -1,  # client mobile number. your login at the site https://www.orange.pl/zaloguj.phtml
+          'MBamount': -1,  # how much data plan
+          'MBdueTo': ''  # and for how long. maybe it should be of datetime class ?
           }
 
 
 # noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck,PySimplifyBooleanCheck
 def main():
-    # access some details as a demo / proof of concept
     try:
+        # try to authorize. if fails, then ask for new credientals
+        token = authorize()
+    except IOError:
         if __name__ == '__main__':
+            return ('Brak pliku z tokenem. Zaloguj się')
             # import getpass
             print('(enter enter, aby pominąć, jeśli wiesz, że istnieje plik z tokenem)')
             username = input('Podaj login: ')
             password = input('Podaj haseło: ')
             # sanitize this user input
-        token = authorize(username, password)
-        print('---Token działa')
-    except PermissionError as e:
-        print('Cannot authorize!')
-        print(e)
-        exit(-1)
+            token = authorize(username, password)
+            try:
+                token = authorize(u, getpass.getpass('Hasło :'))
+                print(t)
+            except PermissionError:
+                # now it means that credentials are wrong. exit
+                print('Złe dane logowania. Zamykam')
+                exit(-1)
+
     # here we have a working token
     # print("token jest i działa: " + token[0] + ', ' + token[1])
     if client['msisdn'] < 0 or client['id'] < 0:
@@ -103,8 +110,8 @@ def getInfoServices(token, msisdn):
                    resource_owner_key=token[0],
                    resource_owner_secret=token[1], signature_method='PLAINTEXT')
     payload = (
-        '<β:getNewInfoservicesAPIIn xmlns:β="api.orange.pl" xmlns=""><object><appVersion>3.4</appVersion><msisdn>' + str(
-            msisdn) + '</msisdn></object><apiCode>mainPackageAPI</apiCode><apiCode>additionalPackageAPI</apiCode><withLimits>yes</withLimits><withSteps>yes</withSteps></β:getNewInfoservicesAPIIn>').encode(
+            '<β:getNewInfoservicesAPIIn xmlns:β="api.orange.pl" xmlns=""><object><appVersion>3.4</appVersion><msisdn>' + str(
+        msisdn) + '</msisdn></object><apiCode>mainPackageAPI</apiCode><apiCode>additionalPackageAPI</apiCode><withLimits>yes</withLimits><withSteps>yes</withSteps></β:getNewInfoservicesAPIIn>').encode(
         'utf-8')
     response = requests.post(url=url['host'] + url['path'], data=payload, headers=headers, auth=oauth)
     if response.status_code != 200:
