@@ -11,3 +11,26 @@ Although it is GUI, its look reveals that you can say I feel much better in CLI 
 
 This small utility is confirmed (by glorious myself) to work with polish Orange Free - a pre-paid internet service - but it should work in other countries too, provided API is the same..
 Login via token works. They use OAuth1 lmao.
+
+
+## Update USAGE:
+
+- Importing
+```
+> import my_orange_client
+> my_orange_client.getMBamount()
+102
+> my_orange_client.getDueToDays()
+364
+```
+
+- Running as a program
+
+```
+$ python3 my_orange_client.py 
+standalone mode
+---Brak nowych powiadomień
+---Pozostało 99,39 GB do wykorzystania przez 127 dni. (średnio 801,4 MB dziennie)
+```
+
+Upon first exectuion it will either complain about lack of token file or will ask you to log in.
