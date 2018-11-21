@@ -7,6 +7,59 @@ tokenFilename = 'token.txt'
 
 token = ()
 
+class MBamount:
+    def __init__(self, amount = None):
+        if type(amount) == str:
+            if (' ' in amount):
+                self.amount, self.units = amount.split()
+                self.amount = float(self.amount)
+            else:
+                self.amount = float(amount)
+                self.units = 'GB'
+        elif type(amount) == float:
+            self.amount = amount
+            self.units = 'GB'
+        self.normalize()
+
+    def __repr__(self):
+        return self.__str__()
+    def __str__(self):
+        if not self.amount:
+            return '--' + ' ' + self.units
+        else:
+            return str(self.amount).replace('.', ',') + ' ' + self.units
+
+    def __eq__(self, incoming):
+        if incoming is None:
+            return True if self.amount is None else False
+        return self.amount == incoming
+
+    def __int__(self):
+        return int(self.amount)
+
+    def __float__(self):
+        return self.amount
+
+    def normalize(self):
+        # normalize to GB
+        normalize_factor = None
+        units_case = self.units.lower()
+        if units_case== 'kb':
+            normalize_factor = 1000.0**2
+        elif units_case == 'kib':
+                    normalize_factor = 1024.0**2
+        elif units_case == 'mb':
+            normalize_factor = 1000.0
+        elif units_case == 'mib':
+            normalize_factor = 1024.0
+        elif units_case == 'gib':
+            normalize_factor = 1.024
+        elif units_case == 'gb':
+            return
+
+        self.amount /= normalize_factor
+        self.units = 'GB'
+
 client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',
           # yeah, it is hardcoded. I got it by sniffing the mobile app
           'client_secret': '0772c63e86fc4568a7ef2a17a794c418',
@@ -45,7 +98,7 @@ def refreshClient():
         token = handleToken()
     except IOError:
         if __name__ == '__main__':
-            return ('Brak pliku z tokenem. Zaloguj się')
+            print ('Brak pliku z tokenem. Zaloguj się')
             # import getpass
             print('(enter enter, aby pominąć, jeśli wiesz, że istnieje plik z tokenem)')
             username = input('Podaj login: ')
@@ -84,8 +137,8 @@ def main():
         if serviceInfo[0] == True:
             client.update(serviceInfo[1])
         averageMBperDay = round(
-            float(client['MBamount'].split()[0].replace(',', '.')) / float(client['MBdueTo']) * 1024, 1)
-        print('---Pozostało ' + client['MBamount'] + ' do wykorzystania przez ' + client[
+            float(client['MBamount']) / float(client['MBdueTo']) * 1024, 1)
+        print('---Pozostało ' + str(client['MBamount']) + ' do wykorzystania przez ' + client[
             'MBdueTo'] + ' dni. (średnio ' + str(averageMBperDay).replace('.', ',') + ' MB dziennie)')
 
 
@@ -157,7 +210,7 @@ def getInfoServices(token, msisdn):
         # 2  - intenet amount and date due
 
         try:
-            return (True, {'MBamount': packageValues[1][1].get_text('value').replace('.', ','),
+            return (True, {'MBamount': MBamount(packageValues[1][1].get_text('value')),
                            # pity of me. for complience with computer world it should be dot not comma, but I like comma better!
                            'MBdueTo': packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1],
                            })
