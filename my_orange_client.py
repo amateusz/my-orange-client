@@ -7,7 +7,7 @@ tokenFilename = 'token.txt'
 
 token = ()
 
-class MBamount:
+class Data_Amount:
     def __init__(self, amount = None):
         if type(amount) == str:
             if (' ' in amount):
@@ -71,14 +71,14 @@ client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',
           }
 
 
-def getMBamount():
+def getGBamount():
     if not client['MBamount']:
         if not client['msisdn'] or not client['id']:
             refreshClient()
         serviceInfo = getInfoServices(token, client['msisdn'])
         if serviceInfo[0] == True:
             client.update(serviceInfo[1])
-    print(client['MBamount'])
+    return(client['MBamount'])
 
 
 def getDueToDays():  # due FOR should it be
@@ -210,7 +210,7 @@ def getInfoServices(token, msisdn):
         # 2  - intenet amount and date due
 
         try:
-            return (True, {'MBamount': MBamount(packageValues[1][1].get_text('value')),
+            return (True, {'MBamount': Data_Amount(packageValues[1][1].get_text('value')),
                            # pity of me. for complience with computer world it should be dot not comma, but I like comma better!
                            'MBdueTo': packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1],
                            })
