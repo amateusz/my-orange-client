@@ -68,8 +68,9 @@ client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',
           # yeah, it is hardcoded. I got it by sniffing the mobile app
           'client_secret': '0772c63e86fc4568a7ef2a17a794c418',
           'callback_url': 'oob',  # ?? whatever it means'
-          'id': '',
-          'msisdn': None,  # client mobile number. your login at the site https://www.orange.pl/zaloguj.phtml
+          'id': None,
+          'msisdn': None,  # client's mobile number. your login at the site https://www.orange.pl/zaloguj.phtml
+
           'MBamount': None,  # how much data plan
           'MBdueTo': ''  # and for how long. maybe it should be of datetime class ?
           }
@@ -130,23 +131,6 @@ def refreshClient():
 
 
 # noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck,PySimplifyBooleanCheck
-def main():
-    if not refreshClient():
-        exit(1)  # some error refreshing client data
-    else:
-        notifications = getNotifications()
-        if notifications[0] == True:
-            print('---Brak nowych powiadomień') if notifications[1] is None else notifications
-        serviceInfo = getInfoServices(token, client['msisdn'])
-        if serviceInfo[0] == True:
-            client.update(serviceInfo[1])
-        averageMBperDay = round(
-            float(client['MBamount']) / float(client['MBdueTo']) * 1024, 1)
-        print('---Pozostało ' + str(client['MBamount']) + ' do wykorzystania przez ' + client[
-            'MBdueTo'] + ' dni. (średnio ' + str(averageMBperDay).replace('.', ',') + ' MB dziennie)')
-
-
-# noinspection PySimplifyBooleanCheck
 def handleToken(username=None, password=None):
     """Tries to load long term token from file. If not found takes /username/ and /password/ and generates long term token and saves it in working folder.\nIf no credientials provided and no file is fount, then raises exception."""
 
@@ -183,7 +167,7 @@ def handleToken(username=None, password=None):
             # uf there is no file, get them new tokens
 
 
-# noinspection PyRedundantParentheses,PyRedundantParentheses
+# noinspection PySimplifyBooleanCheck
 def getInfoServices(token, msisdn):
     # xml:
     # <β:getNewInfoservicesAPIIn xmlns:β="api.orange.pl" xmlns=""><object><appVersion>3.4</appVersion><msisdn>572359832</msisdn></object><apiCode>mainPackageAPI</apiCode><apiCode>additionalPackageAPI</apiCode><withLimits>yes</withLimits><withSteps>yes</withSteps></β:getNewInfoservicesAPIIn>
@@ -224,7 +208,7 @@ def getInfoServices(token, msisdn):
             # exit(1)
 
 
-# noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
+# noinspection PyRedundantParentheses,PyRedundantParentheses
 def getNotifications():
     # example GET https://mapi.orange.pl/api/endpoint/services/rest/notification?msisdn=572359xxx
     url = {'host': 'http://mapi.orange.pl',
@@ -333,6 +317,7 @@ def getNewToken(username, password):
     return (True, token)
 
 
+# noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
 def setMsisdn(msisdn):
     try:
         sanitize = int(msisdn)
@@ -342,6 +327,22 @@ def setMsisdn(msisdn):
         print('niepoprawna wartość MSISDN (numeru telefonu). Podaj 9 cyfr.')
     else:
         client['msisdn'] = sanitize
+
+
+def main():
+    if not refreshClient():
+        exit(1)  # some error refreshing client data
+    else:
+        notifications = getNotifications()
+        if notifications[0] == True:
+            print('---Brak nowych powiadomień' if notifications[1] is None else notifications)
+        serviceInfo = getInfoServices(token, client['msisdn'])
+        if serviceInfo[0] == True:
+            client.update(serviceInfo[1])
+        averageMBperDay = round(
+            float(client['MBamount']) / float(client['MBdueTo']) * 1024, 1)
+        print('---Pozostało ' + str(client['MBamount']) + ' do wykorzystania przez ' + client[
+            'MBdueTo'] + ' dni. (średnio ' + str(averageMBperDay).replace('.', ',') + ' MB dziennie)')
 
 
 if __name__ == '__main__':
