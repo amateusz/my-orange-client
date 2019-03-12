@@ -7,8 +7,9 @@ tokenFilename = 'token.txt'
 
 token = ()
 
+
 class Data_Amount:
-    def __init__(self, amount = None):
+    def __init__(self, amount=None):
         if type(amount) == str:
             if (' ' in amount):
                 self.amount, self.units = amount.split()
@@ -23,6 +24,7 @@ class Data_Amount:
 
     def __repr__(self):
         return self.__str__()
+
     def __str__(self):
         if not self.amount:
             return '--' + ' ' + self.units
@@ -43,22 +45,24 @@ class Data_Amount:
     def normalize(self):
         # normalize to GB
         normalize_factor = None
-        units_case = self.units.lower()
-        if units_case== 'kb':
-            normalize_factor = 1000.0**2
-        elif units_case == 'kib':
-                    normalize_factor = 1024.0**2
-        elif units_case == 'mb':
+        units_caseless = self.units.lower()
+        # not really considering kilo BITS here
+        if units_caseless == 'kb':
+            normalize_factor = 1000.0 ** 2
+        elif units_caseless == 'kib':
+            normalize_factor = 1024.0 ** 2
+        elif units_caseless == 'mb':
             normalize_factor = 1000.0
-        elif units_case == 'mib':
+        elif units_caseless == 'mib':
             normalize_factor = 1024.0
-        elif units_case == 'gib':
+        elif units_caseless == 'gib':
             normalize_factor = 1.024
-        elif units_case == 'gb':
+        elif units_caseless == 'gb':
             return
 
         self.amount /= normalize_factor
         self.units = 'GB'
+
 
 client = {'client_key': '53b7b45dc10f4ac8bd56d3ea912a7475',
           # yeah, it is hardcoded. I got it by sniffing the mobile app
@@ -78,7 +82,7 @@ def getGBamount():
         serviceInfo = getInfoServices(token, client['msisdn'])
         if serviceInfo[0] == True:
             client.update(serviceInfo[1])
-    return(client['MBamount'])
+    return (client['MBamount'])
 
 
 def getDueToDays():  # due FOR should it be
@@ -98,7 +102,7 @@ def refreshClient():
         token = handleToken()
     except IOError:
         if __name__ == '__main__':
-            print ('Brak pliku z tokenem. Zaloguj się')
+            print('Brak pliku z tokenem. Zaloguj się')
             # import getpass
             print('(enter enter, aby pominąć, jeśli wiesz, że istnieje plik z tokenem)')
             username = input('Podaj login: ')
