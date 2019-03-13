@@ -93,6 +93,7 @@ class MyOrangeClient():
         self.id = None  # whatever it is
 
     def getGBamount(self):
+        '''Returns the very essence of this utility module. As its internal data type is DataAmount, output of this function can be casted freely'''
         if not self.dataAmount:
             if not self.number or not self.id:
                 self.refreshClient()
