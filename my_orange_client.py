@@ -356,8 +356,7 @@ if __name__ == '__main__':
         print('(enter enter, aby pominąć, jeśli wiesz, że istnieje plik z tokenem)')
         username = input('Podaj login: ')
         password = getpass.getpass('Podaj haseło: ')
-        # sanitize this user input
-        # token = orange.giveMeToken(username, password)
+        # sanitize this user input ? anyone ?
         try:
             token = orange.giveMeToken(username, password)
         except PermissionError:

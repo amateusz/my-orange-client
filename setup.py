@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='my-orange-client',
-    version='1.0',
+    version='1.1',
     packages=[''],
     url='https://github.com/amateusz/my-orange-client',
     license='ffa',
