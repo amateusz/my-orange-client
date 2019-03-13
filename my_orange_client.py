@@ -320,13 +320,13 @@ def getNewToken(username, password):
 # noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
 def setMsisdn(msisdn):
     try:
-        sanitize = int(msisdn)
+        sanitized = int(msisdn)
         if len(str(msisdn)) != 9:
             raise ValueError
     except ValueError:
         print('niepoprawna wartość MSISDN (numeru telefonu). Podaj 9 cyfr.')
     else:
-        client['msisdn'] = sanitize
+        client['msisdn'] = sanitized
 
 
 def main():
