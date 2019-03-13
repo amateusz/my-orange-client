@@ -9,13 +9,15 @@ except IOError:
     print('Brak pliku z tokenem. Zaloguj się')
     import getpass
 
-    u = input('Login: ')
     try:
+        u = input('Login: ')
         t = orange.giveMeToken(u, getpass.getpass('Hasło :'))
         print(t)
     except PermissionError:
         # now it means that credentials are wrong. exit
         print('Złe dane logowania. Zamykam')
         exit(-1)
-else:
+finally:
+    orange.authenticate(t)
+    orange.refreshDetails(t)
     print(orange.getGBamount())

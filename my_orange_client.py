@@ -170,7 +170,7 @@ class MyOrangeClient():
                 return token
 
     # noinspection PySimplifyBooleanCheck
-    def refresh(self, token):
+    def refreshDetails(self, token):
         # old name: getInfoServices
         # xml:
         # <β:getNewInfoservicesAPIIn xmlns:β="api.orange.pl" xmlns=""><object><appVersion>3.4</appVersion><msisdn>572359832</msisdn></object><apiCode>mainPackageAPI</apiCode><apiCode>additionalPackageAPI</apiCode><withLimits>yes</withLimits><withSteps>yes</withSteps></β:getNewInfoservicesAPIIn>
@@ -375,7 +375,7 @@ if __name__ == '__main__':
             # now it means that credentials are wrong. exit
             print('Złe dane logowania. Zamykam')
             exit(1)
-    # here we have a working token.
+    # here we have a working token. supposedly. it might be outdated (expired)
     try:
         # verify if the token works
         orange.authenticate(token)
@@ -386,7 +386,7 @@ if __name__ == '__main__':
         if notifications[0] == True:
             print('---Brak nowych powiadomień' if notifications[1] is None else notifications)
 
-        orange.refresh(token)
+        orange.refreshDetails(token)
         # and now the real thing: GBs and due date
         averageMBperDay = round(
             float(orange.getGBamount()) / orange.getDueToDays() * 1024, 1)
