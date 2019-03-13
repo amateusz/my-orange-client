@@ -351,7 +351,9 @@ class MyOrangeClient():
             self.number = sanitized
 
 
-def main():
+if __name__ == '__main__':
+    print('standalone mode')
+    # therefor do some stand alone'y things:
     orange = MyOrangeClient()
 
     # verify that we have an access
@@ -369,11 +371,6 @@ def main():
         print('---Pozostało ' + str(
             orange.getGBamount()) + ' do wykorzystania przez ' + str(orange.getDueToDays()) + ' dni. (średnio ' + str(
             averageMBperDay).replace('.', ',') + ' MB dziennie)')
-
-
-if __name__ == '__main__':
-    print('standalone mode')
-    main()
 else:
     # imported as module
     pass
