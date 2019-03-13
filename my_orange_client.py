@@ -8,8 +8,6 @@ from requests_oauthlib import OAuth1
 # from bs4 import BeautifulSoup as bs
 tokenFilename = 'token.txt'
 
-token = ()
-
 
 class Data_Amount:
     def __init__(self, amount=None):
@@ -81,37 +79,35 @@ class MyOrangeClient():
         self.dueDate = None  # days left to use the data
         self.number = None
         self.id = None  # whatever it is
+        self.token = None
 
     def getGBamount(self):
         '''Returns the very essence of this utility module. As its internal data type is DataAmount, output of this function can be casted freely'''
-        if not self.dataAmount:
-            if not self.number or not self.id:
-                self.refreshClient()
-            serviceInfo = self.getInfoServices(token)
-            if serviceInfo == True:
-                pass
-        # new data produced: dataAmount and dueDate
+        # if not self.dataAmount:
+        #     if not self.number or not self.id:
+        #         self.authenticate(self.giveMeToken())
+        #     serviceInfo = self.getInfoServices(token)
+        #     if serviceInfo == True:
+        #         pass
+        # # new data produced: dataAmount and dueDate
         return self.dataAmount
 
     def getDueToDays(self):  # due FOR should it be
-        if not self.dueDate:
-            if not self.number or not self.id:
-                self.refreshClient()
-            serviceInfo = self.getInfoServices(token)
-            if serviceInfo == True:
-                pass
-        # new data produced: dataAmount and dueDate
+        # if not self.dueDate:
+        #     if not self.number or not self.id:
+        #         self.authenticate(self.giveMeToken())
+        #     serviceInfo = self.getInfoServices(token)
+        #     if serviceInfo == True:
+        #         pass
+        # # new data produced: dataAmount and dueDate
         return (self.dueDate - datetime.date.today()).days
 
-    def refreshClient(self):
+    def authenticate(self, token):
         '''
         Refreshes user data given a token.
         It there is none, it throws
         :return:
         '''
-        global token
-        # try to authorize. if fails, then ask for new credientals
-        token = self.giveMeToken()  # this WILL throw
 
         # here we have a working token
         # print("token jest i działa: " + token[0] + ', ' + token[1])
@@ -120,12 +116,20 @@ class MyOrangeClient():
             if contractData[0] == True:
                 self.setMsisdn(contractData[1]['msisdn'])
                 self.id = contractData[1]['id']
-                # ready to make call for MBs
+                # ready to make call for GIGABYTESs
             else:
-                return False  # error
+                # error
+                raise ConnectionRefusedError
         return True
 
-    # noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck,PySimplifyBooleanCheck
+    def saveTokenToFile(self, token, location=None):
+        if not location:
+            location = tokenFilename
+        tokenFile = open(location, 'w')
+        # tokenFile.write(token[0] + '\n' + token[1])
+        tokenFile.write('\n'.join(list(token)))
+        tokenFile.close()
+
     def giveMeToken(self, username=None, password=None):
         """
         Tries to load long term token from file.
@@ -142,24 +146,21 @@ class MyOrangeClient():
                 # obtained correct token
                 token = tempTokenResult[1]
                 try:
-                    tokenFile = open(tokenFilename, 'w')
-                    # tokenFile.write(token[0] + '\n' + token[1])
-                    tokenFile.write('\n'.join(list(token)))
-                    tokenFile.close()
-                    return token
+                    self.saveTokenToFile(token)
                 except:
                     raise
                     # error writing token to file.
+                else:
+                    return token
+
             else:
-                print(tempTokenResult)
-                raise PermissionError('Wrong credientals!')
-                # exit(-1)  # no stored token found and getting new token failed
+                print(tempTokenResult[2])
+                raise PermissionError('Wrong credientals or token invalid!')
+                exit(-1)  # no stored token found and getting new token failed
         else:
             # no credentials. better there be a token file
             try:
-                tokenFile = open(tokenFilename, 'r')
-                token = tuple([_ for _ in tokenFile.read().splitlines()])
-                tokenFile.close()
+                token = self.openTokenFromFile()
             except FileNotFoundError:
                 raise FileNotFoundError('Creating \"' + tokenFilename + '\"')
             except IOError:
@@ -169,7 +170,8 @@ class MyOrangeClient():
                 return token
 
     # noinspection PySimplifyBooleanCheck
-    def getInfoServices(self, token):
+    def refresh(self, token):
+        # old name: getInfoServices
         # xml:
         # <β:getNewInfoservicesAPIIn xmlns:β="api.orange.pl" xmlns=""><object><appVersion>3.4</appVersion><msisdn>572359832</msisdn></object><apiCode>mainPackageAPI</apiCode><apiCode>additionalPackageAPI</apiCode><withLimits>yes</withLimits><withSteps>yes</withSteps></β:getNewInfoservicesAPIIn>
         url = {'host': 'https://mapi.orange.pl',
@@ -336,6 +338,14 @@ class MyOrangeClient():
         else:
             self.number = sanitized
 
+    def openTokenFromFile(self, location=None):
+        if not location:
+            location = tokenFilename
+        tokenFile = open(tokenFilename, 'r')
+        token = tuple([_ for _ in tokenFile.read().splitlines()])
+        tokenFile.close()
+        return token
+
 
 if __name__ == '__main__':
     print('standalone mode')
@@ -346,9 +356,11 @@ if __name__ == '__main__':
     If not found ~takes /username/ and /password/ and generates long term token and saves it in working folder.
     If neither credientials are provided and nor file is found, then it raises exception.
     '''
+
     try:
+        # try to get a token from a /Token Wizard/
+        token = orange.giveMeToken()
         # verify whether we have an access
-        orange.refreshClient()
     except (IOError, FileNotFoundError):
         print('Brak pliku z tokenem. Zaloguj się')
         import getpass
@@ -363,12 +375,18 @@ if __name__ == '__main__':
             # now it means that credentials are wrong. exit
             print('Złe dane logowania. Zamykam')
             exit(1)
-    finally:
-        # let's fetch some notification of none value
+    # here we have a working token.
+    try:
+        # verify if the token works
+        orange.authenticate(token)
+    except ConnectionRefusedError:
+        print('invalid token')
+    else:  # let's fetch some notification of none value
         notifications = orange.getNotifications()
         if notifications[0] == True:
             print('---Brak nowych powiadomień' if notifications[1] is None else notifications)
 
+        orange.refresh(token)
         # and now the real thing: GBs and due date
         averageMBperDay = round(
             float(orange.getGBamount()) / orange.getDueToDays() * 1024, 1)
