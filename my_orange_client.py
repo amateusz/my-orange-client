@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import getpass
 
 import requests
@@ -87,7 +88,7 @@ class MyOrangeClient():
 
     def __init__(self):
         self.dataAmount = None  # in GBs
-        self.daysDue = None  # days left to use the data
+        self.dueDate = None  # days left to use the data
         self.number = None
         self.id = None  # whatever it is
 
@@ -102,14 +103,14 @@ class MyOrangeClient():
         return self.dataAmount
 
     def getDueToDays(self):  # due FOR should it be
-        if not self.daysDue:
+        if not self.dueDate:
             if not self.number or not self.id:
                 self.refreshClient()
             serviceInfo = self.getInfoServices(token)
             if serviceInfo == True:
                 pass
         # new data produced: dataAmount and dueDate
-        return self.daysDue
+        return (self.dueDate - datetime.date.today()).days
 
     def refreshClient(self):
         global token
@@ -213,13 +214,19 @@ class MyOrangeClient():
 
             try:
                 self.dataAmount = Data_Amount(packageValues[1][1].get_text('value'))
-                self.daysDue = packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1]
-                return (True)
-
             except IndexError as ie:
                 print(ie.args)
                 raise
                 # exit(1)
+            else:
+                try:
+                    daysLeft = int(packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1])
+                    self.dueDate = datetime.date.today() + datetime.timedelta(days=daysLeft)
+                except ValueError as ie:
+                    print(ie.args)
+                    raise
+                else:
+                    return (True)
 
         # noinspection PyRedundantParentheses,PyRedundantParentheses
 
@@ -358,9 +365,9 @@ def main():
 
         # and now the real thing: GBs and due date
         averageMBperDay = round(
-            float(orange.getGBamount()) / float(orange.getDueToDays()) * 1024, 1)
+            float(orange.getGBamount()) / orange.getDueToDays() * 1024, 1)
         print('---Pozostało ' + str(
-            orange.getGBamount()) + ' do wykorzystania przez ' + orange.getDueToDays() + ' dni. (średnio ' + str(
+            orange.getGBamount()) + ' do wykorzystania przez ' + str(orange.getDueToDays()) + ' dni. (średnio ' + str(
             averageMBperDay).replace('.', ',') + ' MB dziennie)')
 
 
