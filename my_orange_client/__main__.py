@@ -53,6 +53,7 @@ if __name__ == '__main__':
         orange.authenticate(token)
     except ConnectionRefusedError:
         print('invalid token')
+        exit(1)
     else:  # let's fetch some notification of none value
         notifications = orange.getNotifications()
         if notifications[0] == True:

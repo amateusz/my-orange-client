@@ -18,27 +18,6 @@ class MyOrangeClient:
         self.number = None
         self.id = None  # whatever it is
 
-    def getGBamount(self):
-        '''Returns the very essence of this utility module. As its internal data type is DataAmount, output of this function can be casted freely'''
-        # if not self.dataAmount:
-        #     if not self.number or not self.id:
-        #         self.authenticate(self.giveMeToken())
-        #     serviceInfo = self.getInfoServices(token)
-        #     if serviceInfo == True:
-        #         pass
-        # # new data produced: dataAmount and dueDate
-        return self.dataAmount
-
-    def getDueToDays(self):  # due FOR should it be
-        # if not self.dueDate:
-        #     if not self.number or not self.id:
-        #         self.authenticate(self.giveMeToken())
-        #     serviceInfo = self.getInfoServices(token)
-        #     if serviceInfo == True:
-        #         pass
-        # # new data produced: dataAmount and dueDate
-        return (self.dueDate - datetime.date.today()).days
-
     def authenticate(self, token):
         '''
         Refreshes user data given a token.
@@ -60,12 +39,11 @@ class MyOrangeClient:
         return True
 
     def giveMeToken(self, username=None, password=None):
-        """
-        Tries to load long term token from file.
-        If credentials are provided, then it fetches new one
+        '''
+        Tries to obtain a new token in exchange for credentials.
         If it doesn't work → Exception
         If there is not one → Exception
-        """
+        '''
         if (username is not None or password is not None) and (username is not '' and password is not ''):
             print('no to zgarniam nowy token')
 
@@ -83,7 +61,6 @@ class MyOrangeClient:
         else:
             pass
 
-    # noinspection PySimplifyBooleanCheck
     def refreshDetails(self, token):
         # old name: getInfoServices
         # xml:
@@ -152,6 +129,7 @@ class MyOrangeClient:
 
         # noinspection PyRedundantParentheses,PyRedundantParentheses,PyRedundantParentheses
 
+    # noinspection PySimplifyBooleanCheck
     def getContractData(self, token):
         url = {'host': 'https://mapi.orange.pl',
                'path': '/api2/endpoint/services/ecare'}
@@ -253,7 +231,7 @@ class MyOrangeClient:
             self.number = sanitized
 
     def openTokenFromFile(self, location):
-        tokenFile = open(location , 'r')
+        tokenFile = open(location, 'r')
         token = tuple([_ for _ in tokenFile.read().splitlines()])
         tokenFile.close()
         return token
@@ -263,3 +241,24 @@ class MyOrangeClient:
         # tokenFile.write(token[0] + '\n' + token[1])
         tokenFile.write('\n'.join(list(token)))
         tokenFile.close()
+
+    def getDueToDays(self):  # due FOR should it be
+        # if not self.dueDate:
+        #     if not self.number or not self.id:
+        #         self.authenticate(self.giveMeToken())
+        #     serviceInfo = self.getInfoServices(token)
+        #     if serviceInfo == True:
+        #         pass
+        # # new data produced: dataAmount and dueDate
+        return (self.dueDate - datetime.date.today()).days
+
+    def getGBamount(self):
+        '''Returns the very essence of this utility module. As its internal data type is DataAmount, output of this function can be casted freely'''
+        # if not self.dataAmount:
+        #     if not self.number or not self.id:
+        #         self.authenticate(self.giveMeToken())
+        #     serviceInfo = self.getInfoServices(token)
+        #     if serviceInfo == True:
+        #         pass
+        # # new data produced: dataAmount and dueDate
+        return self.dataAmount
