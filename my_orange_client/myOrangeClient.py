@@ -1,74 +1,12 @@
-# -*- coding: utf-8 -*-
 import datetime
-import getpass
 
 import requests
 from requests_oauthlib import OAuth1
 
-# from bs4 import BeautifulSoup as bs
-tokenFilename = 'token.txt'
+from my_orange_client.dataAmount import Data_Amount
 
 
-class Data_Amount:
-    def __init__(self, amount=None):
-        if type(amount) == str:
-            if (' ' in amount):
-                self.amount, self.units = amount.split()
-                self.amount = float(self.amount)
-            else:
-                self.amount = float(amount)
-                self.units = 'GB'
-        elif type(amount) == float:
-            self.amount = amount
-            self.units = 'GB'
-        # else:
-        #     self.unit
-        self.normalize()
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        if not self.amount:
-            return '--' + ' ' + self.units
-        else:
-            # pity of me. for complience with computer world it should be dot not comma, but I like comma better!
-            return str(self.amount).replace('.', ',') + ' ' + self.units
-
-    def __eq__(self, incoming):
-        if incoming is None:
-            return True if self.amount is None else False
-        return self.amount == incoming
-
-    def __int__(self):
-        return int(self.amount)
-
-    def __float__(self):
-        return self.amount
-
-    def normalize(self):
-        # normalize to GB
-        normalize_factor = None
-        units_caseless = self.units.lower()
-        # not really considering kilo BITS here
-        if units_caseless == 'kb':
-            normalize_factor = 1000.0 ** 2
-        elif units_caseless == 'kib':
-            normalize_factor = 1024.0 ** 2
-        elif units_caseless == 'mb':
-            normalize_factor = 1000.0
-        elif units_caseless == 'mib':
-            normalize_factor = 1024.0
-        elif units_caseless == 'gib':
-            normalize_factor = 1.024
-        elif units_caseless == 'gb':
-            return
-
-        self.amount /= normalize_factor
-        self.units = 'GB'
-
-
-class MyOrangeClient():
+class MyOrangeClient:
     OAUTH1_KEY = '53b7b45dc10f4ac8bd56d3ea912a7475'
     # yeah, it is hardcoded. I got it by sniffing the mobile app
     OAUTH1_SECRET = '0772c63e86fc4568a7ef2a17a794c418'
@@ -79,7 +17,6 @@ class MyOrangeClient():
         self.dueDate = None  # days left to use the data
         self.number = None
         self.id = None  # whatever it is
-        self.token = None
 
     def getGBamount(self):
         '''Returns the very essence of this utility module. As its internal data type is DataAmount, output of this function can be casted freely'''
@@ -122,14 +59,6 @@ class MyOrangeClient():
                 raise ConnectionRefusedError
         return True
 
-    def saveTokenToFile(self, token, location=None):
-        if not location:
-            location = tokenFilename
-        tokenFile = open(location, 'w')
-        # tokenFile.write(token[0] + '\n' + token[1])
-        tokenFile.write('\n'.join(list(token)))
-        tokenFile.close()
-
     def giveMeToken(self, username=None, password=None):
         """
         Tries to load long term token from file.
@@ -145,29 +74,14 @@ class MyOrangeClient():
             if tempTokenResult[0] == True:
                 # obtained correct token
                 token = tempTokenResult[1]
-                try:
-                    self.saveTokenToFile(token)
-                except:
-                    raise
-                    # error writing token to file.
-                else:
-                    return token
+                return token
 
             else:
                 print(tempTokenResult[2])
                 raise PermissionError('Wrong credientals or token invalid!')
                 exit(-1)  # no stored token found and getting new token failed
         else:
-            # no credentials. better there be a token file
-            try:
-                token = self.openTokenFromFile()
-            except FileNotFoundError:
-                raise FileNotFoundError('Creating \"' + tokenFilename + '\"')
-            except IOError:
-                raise IOError('Provide either user credentials or file with token!')
-                # if there is no file, get them new tokens
-            else:
-                return token
+            pass
 
     # noinspection PySimplifyBooleanCheck
     def refreshDetails(self, token):
@@ -338,62 +252,14 @@ class MyOrangeClient():
         else:
             self.number = sanitized
 
-    def openTokenFromFile(self, location=None):
-        if not location:
-            location = tokenFilename
-        tokenFile = open(tokenFilename, 'r')
+    def openTokenFromFile(self, location):
+        tokenFile = open(location , 'r')
         token = tuple([_ for _ in tokenFile.read().splitlines()])
         tokenFile.close()
         return token
 
-
-if __name__ == '__main__':
-    print('standalone mode')
-    # therefor do some stand alone'y things:
-    orange = MyOrangeClient()
-
-    '''
-    If not found ~takes /username/ and /password/ and generates long term token and saves it in working folder.
-    If neither credientials are provided and nor file is found, then it raises exception.
-    '''
-
-    try:
-        # try to get a token from a /Token Wizard/
-        token = orange.giveMeToken()
-        # verify whether we have an access
-    except (IOError, FileNotFoundError):
-        print('Brak pliku z tokenem. Zaloguj się')
-        import getpass
-
-        print('(enter enter, aby pominąć, jeśli wiesz, że istnieje plik z tokenem)')
-        username = input('Podaj login: ')
-        password = getpass.getpass('Podaj haseło: ')
-        # sanitize this user input ? anyone ?
-        try:
-            token = orange.giveMeToken(username, password)
-        except PermissionError:
-            # now it means that credentials are wrong. exit
-            print('Złe dane logowania. Zamykam')
-            exit(1)
-    # here we have a working token. supposedly. it might be outdated (expired)
-    try:
-        # verify if the token works
-        orange.authenticate(token)
-    except ConnectionRefusedError:
-        print('invalid token')
-    else:  # let's fetch some notification of none value
-        notifications = orange.getNotifications()
-        if notifications[0] == True:
-            print('---Brak nowych powiadomień' if notifications[1] is None else notifications)
-
-        orange.refreshDetails(token)
-        # and now the real thing: GBs and due date
-        averageMBperDay = round(
-            float(orange.getGBamount()) / orange.getDueToDays() * 1024, 1)
-        print('---Pozostało ' + str(
-            orange.getGBamount()) + ' do wykorzystania przez ' + str(
-            orange.getDueToDays()) + ' dni. (średnio ' + str(
-            averageMBperDay).replace('.', ',') + ' MB dziennie)')
-else:
-    # imported as module
-    pass
+    def saveTokenToFile(self, token, location):
+        tokenFile = open(location, 'w')
+        # tokenFile.write(token[0] + '\n' + token[1])
+        tokenFile.write('\n'.join(list(token)))
+        tokenFile.close()

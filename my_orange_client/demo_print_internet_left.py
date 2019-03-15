@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from my_orange_client import MyOrangeClient as Orange
+
 
 try:
     # try to authorize. if fails, then ask for new credientals

@@ -1,9 +1,11 @@
 from distutils.core import setup
+from setuptools import find_packages
 
 setup(
-    name='My Orange client',
+    name='my_orange_client',
     version='1.1',
-    packages=[],
+    # packages=['my_orange_client'],
+    packages=find_packages(),
     url='https://github.com/amateusz/my-orange-client',
     license='ffa',
     author='amateusz',
