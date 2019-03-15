@@ -40,12 +40,13 @@ if __name__ == '__main__':
             # now it means that credentials are wrong. exit
             print('Złe dane logowania. Zamykam')
             exit(1)
-    # here we have a working token. supposedly. it might be outdated (expired)
-    try:
-        orange.saveTokenToFile(token, tokenFilename)
-    except:
-        raise
-        # error writing token to file.
+        # here we have a working token. supposedly. it might be outdated (expired)
+        else:
+            try:
+                orange.saveTokenToFile(token, tokenFilename)
+            except:
+                raise
+                # error writing token to file.
 
     try:
         # verify if the token works
