@@ -38,7 +38,7 @@ class MyOrangeClient:
                 raise ConnectionRefusedError
         return True
 
-    def giveMeToken(self, username=None, password=None):
+    def giveMeToken(self, username, password):
         '''
         Tries to obtain a new token in exchange for credentials.
         If it doesn't work → Exception
@@ -56,10 +56,10 @@ class MyOrangeClient:
 
             else:
                 print(tempTokenResult[2])
-                raise PermissionError('Wrong credientals or token invalid!')
-                exit(-1)  # no stored token found and getting new token failed
+                raise PermissionError('Wrong credientals!')
+                # no stored token found and getting new token failed
         else:
-            pass
+            raise AttributeError('')
 
     def refreshDetails(self, token):
         # old name: getInfoServices
