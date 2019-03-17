@@ -17,7 +17,7 @@ except IOError:
         # now it means that credentials are wrong. exit
         print('Złe dane logowania. Zamykam')
         exit(-1)
-finally:
+else:
     orange.authenticate(t)
     orange.refreshDetails(t)
     print(orange.getGBamount())
