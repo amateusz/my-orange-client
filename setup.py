@@ -4,7 +4,7 @@ from setuptools import find_packages
 
 setup(
     name='my_orange_client',
-    version='1.2.2',
+    version='1.2.3',
     # packages=['my_orange_client'],
     packages=find_packages(),
     url='https://github.com/amateusz/my-orange-client',

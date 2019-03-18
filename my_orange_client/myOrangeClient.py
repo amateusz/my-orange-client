@@ -7,6 +7,7 @@ from my_orange_client.dataAmount import Data_Amount
 
 
 class MyOrangeClient:
+    friendly_name = 'Orange'
     OAUTH1_KEY = '53b7b45dc10f4ac8bd56d3ea912a7475'
     # yeah, it is hardcoded. I got it by sniffing the mobile app
     OAUTH1_SECRET = '0772c63e86fc4568a7ef2a17a794c418'
@@ -27,7 +28,7 @@ class MyOrangeClient:
 
         # here we have a working token
         # print("token jest i działa: " + token[0] + ', ' + token[1])
-        if not self.number or not self.self.id:
+        if not self.number or not self.id:
             contractData = self.getContractData(token)
             if contractData[0] == True:
                 self.setMsisdn(contractData[1]['msisdn'])
