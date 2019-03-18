@@ -8,6 +8,7 @@ from my_orange_client.dataAmount import Data_Amount
 
 class MyOrangeClient:
     friendly_name = 'Orange'
+    friendly_color = 'orange'
     OAUTH1_KEY = '53b7b45dc10f4ac8bd56d3ea912a7475'
     # yeah, it is hardcoded. I got it by sniffing the mobile app
     OAUTH1_SECRET = '0772c63e86fc4568a7ef2a17a794c418'
