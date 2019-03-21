@@ -101,7 +101,11 @@ class MyOrangeClient:
                 # exit(1)
             else:
                 try:
-                    daysLeft = int(packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1])
+                    daysLeft_str = packageValues[1][0].get_text('value').rsplit(maxsplit=2)[1]
+                    if 'dziś' in daysLeft_str:
+                        daysLeft = 0
+                    else:
+                        daysLeft = int(daysLeft_str)
                     self.dueDate = datetime.date.today() + datetime.timedelta(days=daysLeft)
                 except ValueError as ie:
                     print(ie.args)
