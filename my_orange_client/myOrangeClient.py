@@ -106,6 +106,7 @@ class MyOrangeClient:
                         daysLeft = 0
                     else:
                         daysLeft = int(daysLeft_str)
+                    daysLeft += 1  # because they return only the integer part, thus the last day is '0'. we will do better
                     self.dueDate = datetime.date.today() + datetime.timedelta(days=daysLeft)
                 except ValueError as ie:
                     print(ie.args)
